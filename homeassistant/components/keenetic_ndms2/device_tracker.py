@@ -59,6 +59,8 @@ async def async_setup_entry(
                             name=entity_entry.original_name,
                             ip=None,
                             interface=None,
+                            access=None,
+                            schedule=None,
                         ),
                         router,
                     )
@@ -139,6 +141,8 @@ class KeeneticTracker(ScannerEntity):
         if self.is_connected:
             return {
                 "interface": self._device.interface,
+                "access": self._device.access,
+                "schedule": self._device.schedule,
             }
         return None
 

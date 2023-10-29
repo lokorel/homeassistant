@@ -5,9 +5,6 @@ from collections.abc import Callable
 from datetime import timedelta
 import logging
 
-from ndms2_client import Client, ConnectionException, Device, TelnetConnection
-from ndms2_client.client import RouterInfo
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_HOST,
@@ -23,6 +20,8 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_call_later
 import homeassistant.util.dt as dt_util
 
+from .client import Client, Device, RouterInfo
+from .connection import ConnectionException, TelnetConnection
 from .const import (
     CONF_CONSIDER_HOME,
     CONF_INCLUDE_ARP,
@@ -172,6 +171,21 @@ class KeeneticRouter:
             self._available = False
             raise
 
+    async def async_set_access_device(self):
+        """Update devices information."""
+        await self.hass.async_add_executor_job(self._set_access_device)
+
+    def _set_access_device(self, dev: Device, access: str):
+        """Set access device"""
+        _LOGGER.debug("Set access device")
+
+        try:
+            _response = self._client.set_access_device(dev, access)
+            _LOGGER.debug("Successfully set access device: %s", str(_response))
+
+        except ConnectionException:
+            _LOGGER.error("Error set access device")
+
     def _update_devices(self):
         """Get ARP from keenetic router."""
         _LOGGER.debug("Fetching devices from router")
@@ -185,7 +199,7 @@ class KeeneticRouter:
             self._last_devices = {
                 dev.mac: dev
                 for dev in _response
-                if dev.interface in self._tracked_interfaces
+                # if dev.interface in self._tracked_interfaces
             }
             _LOGGER.debug("Successfully fetched data from router: %s", str(_response))
             self._router_info = self._client.get_router_info()

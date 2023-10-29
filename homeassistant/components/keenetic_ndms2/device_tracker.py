@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from ndms2_client import Device
+import voluptuous as vol
 
 from homeassistant.components.device_tracker import (
     DOMAIN as DEVICE_TRACKER_DOMAIN,
@@ -12,12 +12,17 @@ from homeassistant.components.device_tracker import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import (
+    config_validation as cv,
+    entity_platform,
+    entity_registry as er,
+)
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.util.dt as dt_util
 
-from .const import DOMAIN, ROUTER
+from .client import Device
+from .const import DOMAIN, ROUTER, SERVICE_SET_DEVICE_ACCESS
 from .router import KeeneticRouter
 
 _LOGGER = logging.getLogger(__name__)
@@ -68,6 +73,18 @@ async def async_setup_entry(
 
     async_add_entities(restored)
 
+    platform = entity_platform.async_get_current_platform()
+    platform.async_register_entity_service(
+        SERVICE_SET_DEVICE_ACCESS,
+        vol.Schema(
+            {
+                vol.Required("entity_id"): cv.entity_ids,
+                vol.Required("access"): cv.string,
+            }
+        ),
+        SERVICE_SET_DEVICE_ACCESS,
+    )
+
     async_dispatcher_connect(hass, router.signal_update, update_from_router)
 
 
@@ -96,6 +113,11 @@ class KeeneticTracker(ScannerEntity):
             dt_util.utcnow() if device.mac in router.last_devices else None
         )
 
+    @callback
+    async def set_device_access(self, access):
+        await self._router.async_set_access_device(self._device, access)
+        await self._router.request_update()
+
     @property
     def is_connected(self) -> bool:
         """Return true if the device is connected to the network."""
@@ -103,6 +125,7 @@ class KeeneticTracker(ScannerEntity):
             self._last_seen is not None
             and (dt_util.utcnow() - self._last_seen)
             < self._router.consider_home_interval
+            and self._device.interface
         )
 
     @property
@@ -138,13 +161,13 @@ class KeeneticTracker(ScannerEntity):
     @property
     def extra_state_attributes(self):
         """Return the device state attributes."""
+        extra = {
+            "access": self._device.access,
+            "schedule": self._device.schedule,
+        }
         if self.is_connected:
-            return {
-                "interface": self._device.interface,
-                "access": self._device.access,
-                "schedule": self._device.schedule,
-            }
-        return None
+            extra["interface"] = self._device.interface
+        return extra
 
     async def async_added_to_hass(self) -> None:
         """Client entity created."""

@@ -19,3 +19,5 @@ CONF_INCLUDE_ARP = "include_arp"
 CONF_INCLUDE_ASSOCIATED = "include_associated"
 
 CONF_LEGACY_INTERFACE = "interface"
+
+SERVICE_SET_DEVICE_ACCESS = "set_device_access"

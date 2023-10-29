@@ -1,0 +1,23 @@
+# Describes the format for available counter services
+
+set_device_access:
+  target:
+    entity:
+      domain: device_tracker
+  fields:
+    # Key of the field
+    access:
+      # Whether or not field is required (default = false)
+      required: true
+      # Example value that can be passed for this field
+      example: "permit"
+      # The default field value
+      default: "permit"
+      # Selector (https://www.home-assistant.io/docs/blueprint/selectors/) to control
+      # the input UI for this field
+      selector:
+        select:
+          translation_key: "internet_access"
+          options:
+            - "permit"
+            - "deny"

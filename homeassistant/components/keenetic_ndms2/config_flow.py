@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import urlparse
 
-from ndms2_client import Client, ConnectionException, InterfaceInfo, TelnetConnection
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -21,6 +20,8 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 
+from .client import Client, InterfaceInfo
+from .connection import ConnectionException, TelnetConnection
 from .const import (
     CONF_CONSIDER_HOME,
     CONF_INCLUDE_ARP,

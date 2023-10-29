@@ -34,5 +34,25 @@
         }
       }
     }
+  },
+  "services": {
+    "set_device_access": {
+      "name": "Set device access",
+      "description": "Set intenet access of device",
+      "fields": {
+        "access": {
+          "name": "Internet access",
+          "description": "Chose internet access of device"
+        }
+      }
+    }
+  },
+  "selector": {
+    "internet_access": {
+      "options": {
+        "permit": "permit",
+        "deny": "deny"
+      }
+    }
   }
 }

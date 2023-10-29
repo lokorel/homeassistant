@@ -21,3 +21,4 @@ CONF_INCLUDE_ASSOCIATED = "include_associated"
 CONF_LEGACY_INTERFACE = "interface"
 
 SERVICE_SET_DEVICE_ACCESS = "set_device_access"
+SERVICE_SET_DEVICE_SCHEDULE = "set_device_schedule"

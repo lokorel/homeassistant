@@ -43,6 +43,20 @@
         "access": {
           "name": "Internet access",
           "description": "Chose internet access of device"
+        },
+        "keep_schedule": {
+          "name": "Keep exist schedule",
+          "description": "Keep exist schedule or not"
+        }
+      }
+    },
+    "set_device_schedule": {
+      "name": "Set device schedule",
+      "description": "Set schedule of device",
+      "fields": {
+        "schedule": {
+          "name": "Schedule ID",
+          "description": "Input schedule ID"
         }
       }
     }

@@ -12,6 +12,7 @@ _ARP_CMD = "show ip arp"
 _ASSOCIATIONS_CMD = "show associations"
 _HOTSPOT_CMD = "show ip hotspot"
 _HOST_ACCESS_CMD = "ip hotspot host %s %s"
+_HOST_SCHEDULE_CMD = "ip hotspot host %s schedule %s"
 _INTERFACE_CMD = "show interface %s"
 _INTERFACES_CMD = "show interface"
 _ARP_REGEX = re.compile(
@@ -124,7 +125,7 @@ class Client:
 
         return None
 
-    def set_access_device(self, dev: Device, access: str) -> bool:
+    def set_access_device(self, dev: Device, access: str) -> dict:
         info = _parse_dict_lines(
             self._connection.run_command(_HOST_ACCESS_CMD % (dev.mac, access))
         )
@@ -132,7 +133,20 @@ class Client:
         _LOGGER.debug("Result of access set: %s", str(info))
         assert isinstance(info, dict), "Result info response is not a dictionary"
 
-        return True
+        return info
+
+    def set_schedule_device(self, dev: Device, schedule: str) -> dict:
+        info = _parse_dict_lines(
+            self._connection.run_command(_HOST_SCHEDULE_CMD % (dev.mac, schedule))
+        )
+
+        _LOGGER.debug("Result of schedule set: %s", str(info))
+        assert isinstance(info, dict), "Result info response is not a dictionary"
+
+        if "error" in str(info):
+            raise ValueError("Schedule not set: {}".format(str(info)))
+
+        return info
 
     def get_devices(
         self, *, try_hotspot=True, include_arp=True, include_associated=True

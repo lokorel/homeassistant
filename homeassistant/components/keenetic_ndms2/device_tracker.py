@@ -22,7 +22,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.util.dt as dt_util
 
 from .client import Device
-from .const import DOMAIN, ROUTER, SERVICE_SET_DEVICE_ACCESS
+from .const import (
+    DOMAIN,
+    ROUTER,
+    SERVICE_SET_DEVICE_ACCESS,
+    SERVICE_SET_DEVICE_SCHEDULE,
+)
 from .router import KeeneticRouter
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,9 +85,20 @@ async def async_setup_entry(
             {
                 vol.Required("entity_id"): cv.entity_ids,
                 vol.Required("access"): cv.string,
+                vol.Required("keep_schedule"): cv.boolean,
             }
         ),
         SERVICE_SET_DEVICE_ACCESS,
+    )
+    platform.async_register_entity_service(
+        SERVICE_SET_DEVICE_SCHEDULE,
+        vol.Schema(
+            {
+                vol.Required("entity_id"): cv.entity_ids,
+                vol.Required("schedule"): cv.string,
+            }
+        ),
+        SERVICE_SET_DEVICE_SCHEDULE,
     )
 
     async_dispatcher_connect(hass, router.signal_update, update_from_router)
@@ -114,9 +130,14 @@ class KeeneticTracker(ScannerEntity):
         )
 
     @callback
-    async def set_device_access(self, access):
-        await self._router.async_set_access_device(self._device, access)
-        await self._router.request_update()
+    async def set_device_access(self, access, keep_schedule):
+        await self._router.async_set_access_device(self._device, access, keep_schedule)
+        # await self._router.request_update()
+
+    @callback
+    async def set_device_schedule(self, schedule):
+        await self._router.async_set_schedule_device(self._device, schedule)
+        # await self._router.request_update()
 
     @property
     def is_connected(self) -> bool:

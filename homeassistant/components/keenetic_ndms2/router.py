@@ -171,11 +171,15 @@ class KeeneticRouter:
             self._available = False
             raise
 
-    async def async_set_access_device(self):
-        """Update devices information."""
-        await self.hass.async_add_executor_job(self._set_access_device)
+    async def async_set_access_device(self, dev, access, keep_schedule):
+        await self.hass.async_add_executor_job(
+            self._set_access_device, dev, access, keep_schedule
+        )
 
-    def _set_access_device(self, dev: Device, access: str):
+    async def async_set_schedule_device(self, dev, schedule):
+        await self.hass.async_add_executor_job(self._set_schedule_device, dev, schedule)
+
+    def _set_access_device(self, dev: Device, access: str, keep_schedule: bool):
         """Set access device"""
         _LOGGER.debug("Set access device")
 
@@ -185,6 +189,17 @@ class KeeneticRouter:
 
         except ConnectionException:
             _LOGGER.error("Error set access device")
+
+    def _set_schedule_device(self, dev: Device, schedule: str):
+        """Set schedule device"""
+        _LOGGER.debug("Set schedule device")
+
+        try:
+            _response = self._client.set_schedule_device(dev, schedule)
+            _LOGGER.debug("Successfully set schedule device: %s", str(_response))
+
+        except Exception as error:
+            raise ConfigEntryNotReady from error
 
     def _update_devices(self):
         """Get ARP from keenetic router."""

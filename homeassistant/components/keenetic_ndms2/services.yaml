@@ -21,3 +21,19 @@ set_device_access:
           options:
             - "permit"
             - "deny"
+    keep_schedule:
+      required: true
+      default: true
+      selector:
+        boolean:
+
+set_device_schedule:
+  target:
+    entity:
+      domain: device_tracker
+  fields:
+    schedule:
+      required: true
+      example: "schedule0"
+      selector:
+        text:
